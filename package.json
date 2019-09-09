@@ -1,0 +1,28 @@
+{
+  "name": "tiny-reverse-proxy",
+  "version": "0.0.1",
+  "description": "Single command line HTTP and Websocket proxy",
+  "main": "src/index.js",
+  "bin": {
+    "tiny-reverse-proxy": "./bin/tiny-reverse-proxy.js"
+  },
+  "scripts": {
+    "format": "prettier --write *.js *.md",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "proxy",
+    "http",
+    "websocket"
+  ],
+  "author": "DevSide",
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "1.18.2"
+  },
+  "dependencies": {
+    "http-proxy": "1.17.0",
+    "minimist": "1.2.0",
+    "stoppable": "1.1.0"
+  }
+}

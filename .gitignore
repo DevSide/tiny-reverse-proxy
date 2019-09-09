@@ -1,0 +1,10 @@
+# Project
+.yarn
+**/node_modules
+**/*.log
+package-lock.json
+
+# Other
+**/.idea
+**/.DS_Store
+*.iml
