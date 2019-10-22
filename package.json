@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Single command line HTTP and Websocket proxy",
   "main": "src/index.js",
+  "repository": "https://github.com/DevSide/tiny-reverse-proxy",
   "bin": {
     "tiny-reverse-proxy": "./bin/tiny-reverse-proxy.js"
   },
@@ -18,11 +19,16 @@
   "author": "DevSide",
   "license": "MIT",
   "devDependencies": {
-    "prettier": "1.18.2"
+    "@semantic-release/commit-analyzer": "^6.3.0",
+    "@semantic-release/git": "^7.0.16",
+    "@semantic-release/github": "^5.5.4",
+    "@semantic-release/npm": "^5.2.0",
+    "@semantic-release/release-notes-generator": "^7.3.0",
+    "prettier": "^1.18.2",
+    "semantic-release": "^15.13.27"
   },
   "dependencies": {
-    "http-proxy": "1.17.0",
-    "minimist": "1.2.0",
-    "stoppable": "1.1.0"
+    "http-proxy": "1.18.0",
+    "minimist": "1.2.0"
   }
 }

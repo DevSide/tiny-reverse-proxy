@@ -7,15 +7,23 @@ function runProxy (host, port, localPort = port) {
   })
 
   const proxyServer = http.createServer((req, res) => {
+    try {
       proxy.web(req, res)
-    })
+    } catch (error) {
+      console.error(`[tiny-reverse-proxy] Failed to proxify web.`)
+    }
+  })
 
   proxyServer.on("upgrade", (req, socket, head) => {
-    socket.on('error', error => {
-      console.error(error.message);
+    socket.on('error', () => {
+      console.error(`[tiny-reverse-proxy] Failed on upgrade.`)
     });
 
-    proxy.ws(req, socket, head);
+    try {
+      proxy.ws(req, socket, head);
+    } catch (error) {
+      console.error(`[tiny-reverse-proxy] Failed to proxify ws.`)
+    }
   });
 
   proxyServer.listen(localPort);
