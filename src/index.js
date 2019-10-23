@@ -1,36 +1,52 @@
-const http = require("http");
-const { createProxyServer } = require("http-proxy");
+const http = require(`http`)
+const { createProxyServer } = require(`http-proxy`)
 
-function runProxy (host, port, localPort = port) {
+let nextProxyId = 1
+
+const log = (level, message, { proxyId, req } = {}) => {
+  const headers = [`[tiny-reverse-proxy]`]
+
+  if (proxyId) {
+    headers.push(`[proxyId=${proxyId}]`)
+  }
+
+  if (req) {
+    headers.push(`[${req.method} ${req.url}]`)
+  }
+
+  console[level](`${headers.join(``)} ${message}`)
+}
+
+function runProxy (proxyId, host, port, localPort = port) {
   const proxy = createProxyServer({
     target: { host, port }
   })
 
   const proxyServer = http.createServer((req, res) => {
-    try {
-      proxy.web(req, res)
-    } catch (error) {
-      console.error(`[tiny-reverse-proxy] Failed to proxify web.`)
-    }
+    proxy.web(req, res)
   })
 
-  proxyServer.on("upgrade", (req, socket, head) => {
-    socket.on('error', () => {
-      console.error(`[tiny-reverse-proxy] Failed on upgrade.`)
-    });
+  proxyServer.on(`upgrade`, (req, socket, head) => {
+    socket.on(`error`, () => {
+      log(`error`, `Failed on upgrade.`, { proxyId, req })
+    })
 
-    try {
-      proxy.ws(req, socket, head);
-    } catch (error) {
-      console.error(`[tiny-reverse-proxy] Failed to proxify ws.`)
-    }
-  });
+    proxy.ws(req, socket, head)
+  })
 
-  proxyServer.listen(localPort);
+  proxy.on(`error`, (err, req) => {
+    log(`error`, err.message, { proxyId, req })
+  })
 
-  console.info(`[tiny-reverse-proxy] HTTP/Websocket proxy from 127.0.0.1:${localPort} to ${host}:${port}`);
+  proxyServer.listen(localPort)
 
-  return () => proxy.close(() => proxyServer.close());
+  log(
+    `info`,
+    `HTTP/Websocket proxy from 127.0.0.1:${localPort} to ${host}:${port}`,
+    { proxyId }
+  )
+
+  return () => proxy.close(() => proxyServer.close())
 }
 
 function throwOptionError () {
@@ -46,19 +62,25 @@ function throwOptionError () {
 }
 
 exports.cli = function cli (args) {
-  const options = args.length ? args : (process.env.TINY_REVERSE_PROXY || ``).split(' ')
-  const { proxy: proxyOption } = require("minimist")(options);
+  const options = args.length
+    ? args
+    : (process.env.TINY_REVERSE_PROXY || ``).split(` `)
+  const { proxy: proxyOption } = require(`minimist`)(options)
   const proxyOptions = Array.isArray(proxyOption) ? proxyOption : [proxyOption]
   const proxyRunners = []
 
   for (const proxyOption of proxyOptions) {
-    const [host, hostPort, localPort] = (proxyOption || ``).split(',')
+    const [host, hostPort, localPort] = (proxyOption || ``).split(`,`)
 
-    if (!host || !Number.isInteger(Number(hostPort)) || (localPort && !Number.isInteger(Number(hostPort)))) {
+    if (
+      !host ||
+      !Number.isInteger(Number(hostPort)) ||
+      (localPort && !Number.isInteger(Number(hostPort)))
+    ) {
       return throwOptionError()
     }
 
-    proxyRunners.push(() => runProxy(host, hostPort, localPort))
+    proxyRunners.push(() => runProxy(nextProxyId++, host, hostPort, localPort))
   }
 
   const proxyCloseHandlers = []
@@ -68,7 +90,7 @@ exports.cli = function cli (args) {
       for (const proxyCloseHandler of proxyCloseHandlers) {
         proxyCloseHandler()
       }
-      console.info(`[tiny-reverse-proxy] All proxies get stopped. Reason: ${reason}.`)
+      log(`error`, `All proxies get stopped. Reason: ${reason}.`)
       process.exit(0)
     }
   }
