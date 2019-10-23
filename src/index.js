@@ -1,13 +1,11 @@
 const http = require(`http`)
 const { createProxyServer } = require(`http-proxy`)
 
-let nextProxyId = 1
-
 const log = (level, message, { proxyId, req } = {}) => {
   const headers = [`[tiny-reverse-proxy]`]
 
   if (proxyId) {
-    headers.push(`[proxyId=${proxyId}]`)
+    headers.push(`[proxy=${proxyId}]`)
   }
 
   if (req) {
@@ -17,7 +15,9 @@ const log = (level, message, { proxyId, req } = {}) => {
   console[level](`${headers.join(``)} ${message}`)
 }
 
-function runProxy (proxyId, host, port, localPort = port) {
+function runProxy (host, port, localPort = port) {
+  const proxyId = `${host},${port},${localPort}`
+
   const proxy = createProxyServer({
     target: { host, port }
   })
@@ -80,7 +80,7 @@ exports.cli = function cli (args) {
       return throwOptionError()
     }
 
-    proxyRunners.push(() => runProxy(nextProxyId++, host, hostPort, localPort))
+    proxyRunners.push(() => runProxy(host, hostPort, localPort))
   }
 
   const proxyCloseHandlers = []
