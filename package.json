@@ -10,6 +10,7 @@
   "scripts": {
     "format": "prettier-eslint --write **/*.js *.md",
     "lint": "eslint **/*.js",
+    "release": "semantic-release",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
