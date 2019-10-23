@@ -1,6 +1,6 @@
 {
   "name": "tiny-reverse-proxy",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Single command line HTTP and Websocket proxy",
   "main": "src/index.js",
   "repository": "https://github.com/DevSide/tiny-reverse-proxy",
