@@ -29,6 +29,7 @@ function runProxy (host, port, localPort = port) {
   proxyServer.on(`upgrade`, (req, socket, head) => {
     socket.on(`error`, () => {
       log(`error`, `Failed on upgrade.`, { proxyId, req })
+      req.abort()
     })
 
     proxy.ws(req, socket, head)
@@ -36,6 +37,7 @@ function runProxy (host, port, localPort = port) {
 
   proxy.on(`error`, (err, req) => {
     log(`error`, err.message, { proxyId, req })
+    req.abort()
   })
 
   proxyServer.listen(localPort)
